@@ -1,0 +1,6 @@
+.offbox { display: flex; gap: 10px; align-items: center; background: var(--card); border: 1px solid var(--line); border-left: 4px solid #2E7D32; border-radius: 12px; padding: 10px 12px; margin-bottom: 4px; }
+.offbox > div { flex: 1; min-width: 0; }
+.offbox b { font: 700 15px var(--display); letter-spacing: .05em; text-transform: uppercase; display: block; }
+.offbox span { font-size: 13px; color: var(--ink-2); display: block; }
+.bar2 { height: 6px; border-radius: 3px; background: var(--line); margin-top: 6px; overflow: hidden; }
+.bar2 span { display: block; height: 100%; width: 0; background: #2E7D32; transition: width .3s; }
