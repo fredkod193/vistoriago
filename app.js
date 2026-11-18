@@ -61,7 +61,7 @@ function route() {
   const h = decodeURIComponent(location.hash.replace(/^#\/?/, ''));
   const [r, ...a] = h.split('/');
   $('#sheet').hidden = true;
-  if (r !== 'mapa') document.body.classList.remove('mapmode');
+  document.body.classList.remove('mapmode'); window.onresize = null;
   const tab = { '': 'home', busca: 'busca', exig: 'home', lib: 'home', salvos: 'home', doc: 'busca', modelos: 'modelos', notas: 'notas', nota: 'notas', mapa: 'mapa' }[r] || 'home';
   document.querySelectorAll('#tabs a').forEach(x => x.classList.toggle('on', x.dataset.tab === tab));
   if (r === 'busca') return viewBusca(a.join('/'));
@@ -214,7 +214,8 @@ function snippet(c, ts) {
 function hl(html, ts) {
   if (!ts || !ts.length) return html;
   const src = norm(html); const marks = [];
-  for (const x of ts) { for (const s of new Set([x, x.replace(/ /g, '-')])) { if (s.length < 2) continue; let p = src.indexOf(s); while (p !== -1) { marks.push([p, p + s.length]); p = src.indexOf(s, p + s.length); } } }
+  const isW = ch => !!ch && /[a-z0-9]/.test(ch);
+  for (const x of ts) { for (const s of new Set([x, x.replace(/ /g, '-')])) { if (s.length < 2) continue; let p = src.indexOf(s); while (p !== -1) { if (!isW(src[p - 1])) { let e = p + s.length; while (isW(src[e])) e++; marks.push([p, e]); } p = src.indexOf(s, p + s.length); } } }
   if (!marks.length) return html;
   marks.sort((a, b) => a[0] - b[0]);
   let out = '', last = 0, n = 0;
@@ -277,7 +278,7 @@ async function viewDoc(id, k, q) {
   const imgSrc = n => scan ? (window.nbrImg ? window.nbrImg(pad(n)) : `paginas/NBR-10897-2007/p-${pad(n)}.png`) : `tab/${id}/p-${pad(n)}.webp`;
   const linesT = c.texto.split('\n').filter(l => l.trim());
   const tableLike = linesT.filter(l => /\S\s{4,}\S/.test(l)).length / Math.max(linesT.length, 1) > 0.25;
-  const srcTxt = tableLike ? c.texto : c.texto.replace(/([^\n.:;])\n[ \t]*(?=[a-zà-ü(,])/g, '$1 ');
+  const srcTxt = tableLike ? c.texto : c.texto.replace(/([a-zà-ü])-\n[ \t]*(?=[a-zà-ü])/g, '$1-').replace(/([^\n.:;])\n[ \t]*(?=[a-zà-ü(,])/g, '$1 ');
   let body = esc(srcTxt).replace(/\[p\. (\d+)\]/g, (m, n) => scan || tp.includes(+n) ? `<button class="pgbtn" data-src="${imgSrc(n)}">página ${n} · ver original ▸</button>` : `<span class="pg">página ${n}</span>`);
   const cpages = [...new Set([c.pagina, ...[...c.texto.matchAll(/\[p\. (\d+)\]/g)].map(m => +m[1])])].filter(n => tp.includes(n));
   body = hl(body, ts);
@@ -498,6 +499,43 @@ function especiais(c, lin) {
     if (bat) add(S, 'Área de baterias com as medidas de segurança previstas para a edificação', 'NT-44 5.8.1', 'ok', 'A critério do RT, item 6.10.2 da NBR 13231.');
     add(S, brigOk ? 'Brigadistas devem conhecer a localização dos painéis, inversores, baterias e do desligamento' : 'Recomenda-se que a população fixa conheça a localização dos painéis, inversores, baterias e do desligamento', brigOk ? 'NT-44 5.3.1' : 'NT-44 5.3.2', brigOk ? 'ok' : 'rec', '');
   }
+  if (c.pisc) {
+    const S = 'Piscina (NT-16/2022)';
+    const auto = /^A-[23]/.test(c.div) || (c.div === 'A-1' && c.a1 === 'cond') ? 'III' : /^B-/.test(c.div) ? 'II' : /^E-/.test(c.div) ? 'IV' : /^H-/.test(c.div) ? 'V' : 'I';
+    const T = c.pTipo && c.pTipo !== 'auto' ? c.pTipo : auto;
+    const NOMES = { I: 'uso público (clubes, parques aquáticos, centros comunitários)', II: 'hospedagem (hotéis, flats, pousadas)', III: 'residencial multifamiliar/coletiva (A-2/A-3)', IV: 'educacional/treinamento (academias, escolas, creches)', V: 'serviços de saúde (terapia, fisioterapia)' };
+    add(S, `Classificação: piscina Tipo ${T} – ${NOMES[T]}`, 'NT-16 Tabela A-1', 'ok', (c.pTipo === 'auto' || !c.pTipo ? 'Tipo sugerido pela divisão; ajuste se necessário. ' : '') + 'Spas, ofurôs e banheiras de hidromassagem também são considerados piscina (nota genérica d).');
+    add(S, 'Placas de advertência no acesso à piscina (NT-20): maior profundidade; "EM CASO DE EMERGÊNCIA LIGUE 193"; "CRIANÇAS DEVEM FAZER A UTILIZAÇÃO DE PISCINAS SOB A SUPERVISÃO DE ADULTOS"', 'NT-16 5.4 e Tabela A-2 (nota 8)', 'ok', (T === 'I' || T === 'II' ? 'Incluir também o horário de funcionamento (nota 6). ' : '') + (T === 'II' && c.pL50 ? 'Incluir a lotação da piscina: 1 pessoa a cada 1,9 m² de espelho d’água (nota 7).' : ''));
+    add(S, 'Placa na recepção: "CRIANÇAS DEVEM FAZER A UTILIZAÇÃO DE PISCINAS SOB A SUPERVISÃO DE ADULTOS"', 'NT-16 5.4.1', 'ok', '');
+    add(S, 'Proteção contra aspiração: dispositivo automático que interrompe a sucção quando obstruída + acionamento manual de fácil alcance (inclusive crianças e PCD), sinalizado com placa', 'NT-16 5.8.2 a 5.8.2.2.1 e Tabela A-2 (nota 9)', 'ok', 'Obrigatório inclusive para piscinas já construídas.');
+    add(S, 'Admissão do sistema de filtragem protegida por grelha de segurança contra sucção', 'NT-16 5.8.4', 'ok', '');
+    add(S, 'Ralos de fundo com grades/tampas de aberturas ≤ 10 mm, removíveis só com ferramenta e antivórtice; na parte mais funda, com sistema anti-aspiração de cabelos', 'NT-16 5.8.5 e 5.8.6', 'ok', '');
+    add(S, 'Extintor na casa de bombas / sistema de filtragem', 'NT-16 5.8.1; NT-21', 'ok', '');
+    add(S, 'Instalações elétricas da casa de bombas, iluminação da piscina e área circundante isoladas + ART', 'NT-16 5.7.1', 'ok', '', 1);
+    const iso = T === 'IV' || T === 'V' ? (c.pRestr ? 'no' : 'ok') : 'rec';
+    add(S, 'Isolamento da área circundante: guardas com altura ≥ 1,05 m, aberturas onde não passe esfera de 15 cm (balaústres ≤ 15 cm), sem saliências que enganchem, materiais não estilhaçáveis; acesso separado dos espectadores', 'NT-16 5.3.2 a 5.3.4 e Tabela A-2', iso, iso === 'rec' ? 'Recomendatório para os Tipos I, II e III (nota 1).' : iso === 'no' ? 'Dispensado: ambiente exclusivamente restrito com total controle de acesso (nota 2).' : 'Exigido para os Tipos IV e V, salvo ambiente exclusivamente restrito com controle de acesso (nota 2).');
+    add(S, 'Portão de acesso à área circundante com travamento, largura ≥ 80 cm e abertura para o exterior', 'NT-16 5.3.3 e 5.3.3.1', iso === 'ok' ? 'ok' : 'cond', 'Onde houver isolamento.');
+    if (T === 'IV') add(S, 'Piscinas de creches, escolas e berçários com acessos trancados fora do horário de uso', 'NT-16 5.3.5', 'cond', 'Somente creches, escolas, berçários e assemelhados.');
+    add(S, 'Iluminação externa de toda a piscina para uso noturno', 'NT-16 5.3.6', c.pNoite ? 'ok' : 'cond', c.pNoite ? '' : 'Somente se a piscina funcionar à noite.');
+    // guarda-vidas
+    let gv = 'no', gvm = '';
+    if (T === 'I') { gv = 'ok'; gvm = 'Sem guarda-vidas em serviço: restrição física de acesso + placa de interdição temporária com horário de funcionamento (nota 6).'; }
+    else if (T === 'II') { if (c.pL50) { gv = 'cond'; gvm = 'Isento se a área de piscina tiver lotação < 50 pessoas E houver isolamento (5.3) ou ambiente exclusivamente restrito (nota 7).'; } else { gv = 'ok'; gvm = 'Sem guarda-vidas em serviço: restrição física + placa de interdição com horário (nota 6).'; } }
+    else gvm = T === 'III' ? 'Não exigido; uso monitorado pelos responsáveis pela edificação (nota 5).' : T === 'IV' ? 'Não exigido: treinos com instrutor CREF; creches/escolas com responsável monitorando (6.5 c, d).' : 'Não exigido: uso monitorado pelo profissional responsável (6.5 e).';
+    add(S, 'Guarda-vidas em serviço' + (c.pOnda ? ' (piscina de ondas: mínimo 2 exclusivos, um em cada lateral, com nadadeiras e rescue tube)' : ''), 'NT-16 6.1, 6.5 e Tabela A-2', c.pOnda && T !== 'III' ? 'ok' : gv, gvm);
+    if (gv !== 'no' || c.pOnda) {
+      const s2 = gv === 'cond' && !c.pOnda ? 'cond' : 'ok';
+      add(S, 'Quantidade de guarda-vidas: percurso máximo de 100 m até a vítima, com reforço onde o campo visual estiver comprometido', 'NT-16 6.5 a, b', s2, '');
+      add(S, 'Guarda-vidas com apito e máscara de RCP' + (c.pFundo ? '; piscina > 1,5 m de profundidade: nadadeira e rescue tube' : '') + '; uniforme com "GUARDA-VIDAS" nas costas (cores diferentes das do CBMGO); função exclusiva', 'NT-16 6.2 a 6.4', s2, '');
+      add(S, 'Conjunto de primeiros socorros: cilindro de O₂ ≥ 1,5 m³, manômetro com válvula redutora, fluxômetro e máscara; luvas descartáveis; ressuscitador de silicone com reservatório', 'NT-16 6.6', s2, '');
+      add(S, 'Certificado de formação dos guarda-vidas (empresa credenciada – validade 24 meses)', 'NT-16 7.4.4 d', s2, 'Exigido do responsável na inspeção.', 1);
+    }
+    if (c.pBrinq) {
+      add(S, 'Laudo + ART/RRT dos brinquedos aquáticos (tobogãs, toboáguas, escorregadores)', 'NT-16 5.9.1', 'ok', 'Atestando funcionamento e condições estruturais.', 1);
+      add(S, 'Acessos e áreas dos brinquedos aquáticos restritos e monitorados', 'NT-16 5.9.2', 'ok', '');
+    }
+    add(S, 'Recomendações: afastamento de 1,5 m das divisas; faixa pavimentada ≥ 1,20 m, antiderrapante e com caimento ≥ 2%; boia de salvamento; cor contrastante no ponto mais fundo; 2 drenos de fundo distantes ≥ 1,5 m', 'NT-16 5.2, 5.5.1, 5.6 e 5.8.3', 'rec', '');
+  }
   if (c.save) {
     const S = 'SAVE – recarga de veículos eletrificados (NT-45/2026)';
     const ext = c.svExt, int = c.svInt, m12 = c.svM12, m3 = c.svM3, m4 = c.svM4, ant = c.svAnt;
@@ -551,6 +589,8 @@ function viewExig() {
       <label class="chk"><input id="fpiro" type="checkbox" ${st.piro ? 'checked' : ''}>Haverá espetáculo pirotécnico / fogos de artifício</label>
       <label class="chk"><input id="ffv" type="checkbox" ${st.fv ? 'checked' : ''}>Existe sistema fotovoltaico</label>
       <div class="sub" id="ffvw" hidden><label class="chk"><input id="ffvt1" type="checkbox" ${st.fvt1 ? 'checked' : ''}>Tipo 1 — inversor string sem otimizador</label><label class="chk"><input id="ffvt2" type="checkbox" ${st.fvt2 ? 'checked' : ''}>Tipo 2 — micro-inversor ou string com otimizador</label><div class="subh">Instalação</div><label class="chk"><input id="ffvtel" type="checkbox" ${st.fvTel ? 'checked' : ''}>Painéis em telhado/cobertura</label><label class="chk"><input id="ffvcarp" type="checkbox" ${st.fvCarp ? 'checked' : ''}>Painéis como cobertura (carport)</label><label class="chk"><input id="ffvsolo" type="checkbox" ${st.fvSolo ? 'checked' : ''}>Painéis no solo (usina/fazenda solar)</label><label class="chk"><input id="ffvbat" type="checkbox" ${st.fvBat ? 'checked' : ''}>Possui baterias</label></div>
+      <label class="chk"><input id="fpisc" type="checkbox" ${st.pisc ? 'checked' : ''}>Existe piscina (inclui spa, ofurô, hidromassagem)</label>
+      <div class="sub" id="fpiscw" hidden><div class="subh">Tipo de piscina (Tabela A-1)</div><select id="fptipo"><option value="auto">Automático pela divisão</option><option value="I">I – Uso público (clubes, parques aquáticos)</option><option value="II">II – Hospedagem (hotéis, flats, pousadas)</option><option value="III">III – Residencial multifamiliar/coletiva</option><option value="IV">IV – Academias, escolas, creches, treinamento</option><option value="V">V – Serviços de saúde (terapias)</option></select><label class="chk"><input id="fpnoite" type="checkbox" ${st.pNoite ? 'checked' : ''}>Funciona à noite</label><label class="chk"><input id="fpbrinq" type="checkbox" ${st.pBrinq ? 'checked' : ''}>Possui brinquedos aquáticos (tobogã, escorregador)</label><label class="chk"><input id="fponda" type="checkbox" ${st.pOnda ? 'checked' : ''}>Piscina de ondas</label><label class="chk"><input id="fpfundo" type="checkbox" ${st.pFundo ? 'checked' : ''}>Profundidade acima de 1,5 m</label><label class="chk"><input id="fprestr" type="checkbox" ${st.pRestr ? 'checked' : ''}>Ambiente exclusivamente restrito, com controle de acesso</label><label class="chk"><input id="fpl50" type="checkbox" ${st.pL50 ? 'checked' : ''}>Área de piscina com lotação inferior a 50 pessoas</label></div>
       <label class="chk"><input id="fsave" type="checkbox" ${st.save ? 'checked' : ''}>Existe SAVE (recarga de veículos elétricos)</label>
       <div class="sub" id="fsavew" hidden><div class="subh">Local das estações</div><label class="chk"><input id="fsvext" type="checkbox" ${st.svExt ? 'checked' : ''}>Área externa</label><label class="chk"><input id="fsvint" type="checkbox" ${st.svInt ? 'checked' : ''}>Área interna / garagem coberta</label><div class="subh">Modos de recarga</div><label class="chk"><input id="fsvm12" type="checkbox" ${st.svM12 ? 'checked' : ''}>Modo 1 ou 2 (tomada TUE)</label><label class="chk"><input id="fsvm3" type="checkbox" ${st.svM3 ? 'checked' : ''}>Modo 3 (wallbox CA)</label><label class="chk"><input id="fsvm4" type="checkbox" ${st.svM4 ? 'checked' : ''}>Modo 4 (carregador CC)</label><label class="chk"><input id="fsvant" type="checkbox" ${st.svAnt ? 'checked' : ''}>Projeto aprovado até 01/11/2025</label></div></div>
       <div id="fcolw" hidden><label for="fcol">Coluna da tabela</label><select id="fcol"></select></div>
@@ -558,14 +598,14 @@ function viewExig() {
     </div><div id="fres"></div>
     <div class="warn" style="margin-top:14px">Altura conforme Tabela 2 e notas genéricas da NT-01. Medidas pelas Tabelas 5 e 6 do Anexo A; documentos exigíveis na vistoria pelos itens 7.6, 7.7 e 7.10 da NT-01 (anexos de projeto/análise, como B, L e T, e formulários administrativos, como C, F, H e J, não entram), NT-17, NT-28 e NT-30. Itens que dependem de dados não informados aparecem como <b>condicionais</b>. Confira sempre as Tabelas 7 (subsolos) e 8 (riscos específicos).</div>`);
   const colsFor = div => { const r = tabelaDe(div); return r && r.b.cols.length !== 6 && r.b.cols.length > 1 ? r.b.cols : null; };
-  const sync = () => { const d = $('#fdiv').value; const c = colsFor(d); $('#fcolw').hidden = !c; if (c) $('#fcol').innerHTML = c.map((x, i) => `<option value="${i}" ${i === +st.col ? 'selected' : ''}>${esc(x)}</option>`).join(''); $('#fa1w').hidden = d !== 'A-1'; }; const subs = () => { $('#ffvw').hidden = !$('#ffv').checked; $('#fsavew').hidden = !$('#fsave').checked; }; $('#ffv').onchange = subs; $('#fsave').onchange = subs; subs();
+  const sync = () => { const d = $('#fdiv').value; const c = colsFor(d); $('#fcolw').hidden = !c; if (c) $('#fcol').innerHTML = c.map((x, i) => `<option value="${i}" ${i === +st.col ? 'selected' : ''}>${esc(x)}</option>`).join(''); $('#fa1w').hidden = d !== 'A-1'; }; const subs = () => { $('#ffvw').hidden = !$('#ffv').checked; $('#fsavew').hidden = !$('#fsave').checked; $('#fpiscw').hidden = !$('#fpisc').checked; }; $('#ffv').onchange = subs; $('#fsave').onchange = subs; $('#fpisc').onchange = subs; subs(); if (st.pTipo) $('#fptipo').value = st.pTipo;
   $('#fdiv').onchange = sync; sync();
   const box = (h, b) => `<div class="result"><div class="rh">${h}</div><div class="rb">${b}</div></div>`;
   const calc = () => {
     const div = $('#fdiv').value, area = parseFloat($('#farea').value), alt = parseFloat($('#falt').value), ter = $('#fter').checked;
     const lot = parseFloat($('#flot').value), pav = parseFloat($('#fpav').value), glp = $('#fglp').value, a1 = $('#fa1').value, piro = $('#fpiro').checked;
-    const K = ['fv', 'fvt1', 'fvt2', 'fvTel', 'fvCarp', 'fvSolo', 'fvBat', 'save', 'svExt', 'svInt', 'svM12', 'svM3', 'svM4', 'svAnt'], IDS = ['ffv', 'ffvt1', 'ffvt2', 'ffvtel', 'ffvcarp', 'ffvsolo', 'ffvbat', 'fsave', 'fsvext', 'fsvint', 'fsvm12', 'fsvm3', 'fsvm4', 'fsvant'];
-    const X = {}; K.forEach((k, i) => X[k] = $('#' + IDS[i]).checked);
+    const K = ['fv', 'fvt1', 'fvt2', 'fvTel', 'fvCarp', 'fvSolo', 'fvBat', 'save', 'svExt', 'svInt', 'svM12', 'svM3', 'svM4', 'svAnt', 'pisc', 'pNoite', 'pBrinq', 'pOnda', 'pFundo', 'pRestr', 'pL50'], IDS = ['ffv', 'ffvt1', 'ffvt2', 'ffvtel', 'ffvcarp', 'ffvsolo', 'ffvbat', 'fsave', 'fsvext', 'fsvint', 'fsvm12', 'fsvm3', 'fsvm4', 'fsvant', 'fpisc', 'fpnoite', 'fpbrinq', 'fponda', 'fpfundo', 'fprestr', 'fpl50'];
+    const X = {}; K.forEach((k, i) => X[k] = $('#' + IDS[i]).checked); X.pTipo = $('#fptipo').value;
     const col = +($('#fcol').value || 0);
     store.set('exig3', { div, a1, area: $('#farea').value, alt: $('#falt').value, lot: $('#flot').value, pav: $('#fpav').value, terrea: ter, col, glp, piro, ...X });
     const info = DIVS.find(x => x.cod === div);
@@ -715,6 +755,82 @@ function editModelo(m, done) {
   if ($('#edel')) $('#edel').onclick = () => { store.set('modelos_novos', store.get('modelos_novos', []).filter(y => 'n' + y.id !== m.key)); sh.hidden = true; toast('Modelo excluído'); done(); };
 }
 
+/* ---------- opções de ART's e Anexos para as notas ---------- */
+const ARTOPTS = [
+  ['Sistemas previstos na NT-01 (item 7.7.3.8.8)', [
+    ['Sistema de hidrantes/mangotinhos', 'a'], ['Resfriamento de tanques, cilindros e esferas', 'b'], ['Sistema de espuma em tanques e bacias de contenção', 'c'],
+    ['Sistema fixo de gases para combate a incêndio', 'd'], ['Iluminação de emergência (alimentada por grupo motogerador)', 'e'], ['Grupo motogerador (que alimenta sistema de combate)', 'f'],
+    ['Pressurização da escada de segurança', 'g'], ['Elevador de emergência', 'h'], ['Revestimento dos elementos estruturais protegidos contra o fogo', 'i'],
+    ['Central de GLP', 'j'], ['Instalações internas de GLP', 'k'], ['Chuveiros automáticos (sprinklers)', 'l'], ['Detecção de incêndio', 'm'], ['Controle de fumaça', 'n'],
+    ['Controle de materiais de acabamento e revestimento (CMAR)', 'o'], ['Segurança estrutural – instalação/execução (Habite-se ou aumento de área)', 'p'],
+    ['Segurança estrutural – inspeção/manutenção (renovação com revestimento contra fogo)', 'q'], ['Compartimentação vertical e/ou horizontal', 'r'], ['Alarme de incêndio', 's'],
+    ['SPDA', 't'], ['Instalações elétricas de baixa tensão', 'u'], ['Controle de explosão de silos', 'v'], ['Caldeiras', 'w'],
+    ['Estruturas e lonas de cobertura (NT-10) – lotação > 200 pessoas', 'x'], ['Arquibancadas e arenas desmontáveis', 'y'], ['Brinquedos de parques de diversões', 'z'],
+    ['Palcos e palanques', 'aa'], ['Armações de circos', 'bb'], ['Instalações elétricas de montagens provisórias/temporárias', 'cc'],
+    ['Ponto de carregamento de veículo eletrificado (SAVE)', 'dd'], ['Sistema fotovoltaico', 'ee']].map(([t, l]) => ['ART/RRT – ' + t, `NT-01 7.7.3.8.8 ${l}`])],
+  ['Laudos técnicos (NT-01 item 7.7.3.9)', [
+    ['Laudo + ART/RRT – Revestimento resistente ao fogo (TRRF – NT-08 / classe CMAR – NT-10)', 'NT-01 7.7.3.9 a; NT-08 5.20'],
+    ['Laudo + ART/RRT – Instalação dos pontos de carregamento de veículos eletrificados', 'NT-01 7.7.3.9 b; NT-45 6.5'],
+    ['Laudo + ART/RRT – Estrutura/telhado sob placas fotovoltaicas (tratamento incombustível ou reforço)', 'NT-01 7.7.3.9 c; NT-44 6.4.1'],
+    ['ART/RRT – Estrutura atende à carga/incombustibilidade das placas fotovoltaicas', 'NT-01 7.7.3.9 c; NT-44 6.4.1'],
+    ['Laudo + ART/RRT – Instalação do elevador de emergência', 'NT-01 7.7.3.9 d; NT-11 5.9.2.9'],
+    ['Laudo + ART/RRT – Justificativa de impossibilidade técnica (Comissão Técnica/CTD)', 'NT-01 7.7.3.9 e']]],
+  ['Exigidas em normas específicas', [
+    ['ART/RRT – Instalações elétricas da casa de bombas, iluminação da piscina e área circundante', 'NT-16 5.7.1'],
+    ['Laudo + ART/RRT – Brinquedos aquáticos (tobogãs, toboáguas, escorregadores)', 'NT-16 5.9.1'],
+    ['Laudo + ART/RRT – Estabilidade estrutural (recinto esportivo/estádio)', 'NT-12 5.2.2'],
+    ['ART/RRT – Estruturas provisórias, instalações elétricas e equipamentos de eventos em recintos esportivos', 'NT-12 5.14.10'],
+    ['Laudo + ART/RRT – Teste de resistência das barreiras/guarda-corpos (recinto esportivo)', 'NT-12'],
+    ['Laudo de teste do sistema de detecção + ART (pressurização de 2 estágios)', 'NT-13'],
+    ['ART/RRT – Projeto do sistema fixo de gases', 'NT-26 5.8'],
+    ['ART – Projeto de central de GLP em cobertura/laje', 'NT-28 5.3.19.1 e'],
+    ['Laudo + ART – Testes de operação e descarga do sistema de espuma', 'NT-25 P1 5.6.9.2.1'],
+    ['Laudo técnico anual + ART – Cobertura de sapé, piaçava e similares', 'NT-33'],
+    ['Laudo técnico + ART – Subestação elétrica (a cada 2 anos)', 'NT-37 5.8'],
+    ['Laudo de integridade da estrutura + ART/RRT (patologias – edificação existente)', 'NT-41 7.4'],
+    ['Laudo – Dispensa de SPDA em área de comércio varejista de GLP', 'NT-40']]],
+];
+const ANXOPTS = [
+  ['Anexos da NT-01', [
+    ['PSCIP aprovado e Memorial Descritivo (Anexo B) impressos', 'NT-01 7.6.2.2'],
+    ['Anexo E – Declaração de Área Comum da Edificação', 'NT-01 7.7.3.6'],
+    ['Anexo M – Termo de Responsabilidade de Saídas de Emergência', 'NT-01 7.7.3.14'],
+    ['Anexo N – Termo de Responsabilidade de Lotação Máxima', 'NT-01 7.7.3.13'],
+    ['Anexo O – Comprovante de Contratação de Brigada Efetiva', 'NT-01 7.10.1.1'],
+    ['Anexo P – Atestado de Brigada Eventual', 'NT-01 7.10.1 a'],
+    ['Memorial de Cálculo de Brigada', 'NT-01 7.10.3 a'],
+    ['Anexo Q – Declaração de Utilização de Brigadistas e Guarda-Vidas durante Eventos', 'NT-01 7.10.2'],
+    ['Anexo S – Termo de Responsabilidade de Apresentação de Projeto Técnico', 'NT-01 7.7.3.12']]],
+  ['Outros documentos', [
+    ['Nota fiscal de compra/recarga dos extintores', 'NT-01 7.7.3.10'],
+    ['Certificado de Credenciamento (CCR) da empresa de brigada', 'NT-01 7.10.1.1'],
+    ['Certificados de formação/recapacitação dos brigadistas', 'NT-01 7.10.1.1; NT-17'],
+    ['Certificado de formação dos guarda-vidas (validade 24 meses)', 'NT-16 7.4.4 d'],
+    ['Registro do Técnico em Pirotecnia (Blaster)', 'NT-30 6.5.1.3'],
+    ['Requerimento de espetáculo pirotécnico (Anexo A da NT-30)', 'NT-30 6.5.1.1'],
+    ['Plano de Segurança de espetáculo pirotécnico (Anexo B da NT-30)', 'NT-30 6.5.1.6'],
+    ['Contrato de queima de fogos com relação dos fogos', 'NT-30 6.5.1.4']]],
+];
+function optsBlock(k) {
+  const G = k === 'art' ? ARTOPTS : ANXOPTS;
+  const mode = k === 'art' ? `<div class="segm" data-seg="${k}"><span>Serviço:</span><button data-m="" class="on">Geral</button><button data-m="instalação/execução">Instalação</button><button data-m="inspeção/manutenção">Inspeção/manut.</button></div>` : '';
+  return `<details class="opts"><summary>☑ Selecionar ${k === 'art' ? "ART's" : 'anexos'} da lista</summary>${mode}${G.map(([g, items]) => `<div class="og">${esc(g)}</div>${items.map(([t, ref]) => `<label class="oi"><input type="checkbox" data-opt="${k}" value="${esc(t)}"><span>${esc(t)}<small>${esc(ref)}</small></span></label>`).join('')}`).join('')}</details>`;
+}
+function wireOpts(k, grow, save) {
+  const ta = $('#n_' + k); if (!ta) return;
+  let modo = '';
+  const lineOf = t => k === 'art' && modo ? t.replace(/^(Laudo \+ )?ART\/RRT/, (m, l) => (l || '') + `ART/RRT de ${modo}`) : t;
+  const has = t => ta.value.split('\n').some(l => l.replace(/^- /, '').replace(/ de (instalação\/execução|inspeção\/manutenção)/, '') === t);
+  const sync = () => document.querySelectorAll(`[data-opt="${k}"]`).forEach(c => c.checked = has(c.value));
+  document.querySelectorAll(`[data-opt="${k}"]`).forEach(c => c.onchange = () => {
+    let L = ta.value.split('\n').filter(l => l.trim());
+    if (c.checked) L.push(lineOf(c.value)); else L = L.filter(l => l.replace(/^- /, '').replace(/ de (instalação\/execução|inspeção\/manutenção)/, '') !== c.value);
+    ta.value = L.join('\n'); grow(ta); save();
+  });
+  const sg = document.querySelector(`[data-seg="${k}"]`);
+  if (sg) sg.querySelectorAll('button').forEach(b => b.onclick = e => { e.preventDefault(); modo = b.dataset.m; sg.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); });
+  ta.addEventListener('input', sync); sync();
+}
 /* ---------- NOTAS (por vistoria, para copiar ao SIAPI) ---------- */
 const NFIELDS = [
   ['protocolo', 'Protocolo da vistoria', 'input', 'ex.: 2026/0123456'],
@@ -749,11 +865,12 @@ function viewNota(id) {
   setView(`<div class="meta" style="margin:0 2px 8px">Criada em ${fmtData(n.criado)} · salva automaticamente</div>
     <div class="nform">${NFIELDS.map(([k, t, ty, ph]) => `<div class="nf${k === 'protocolo' ? ' main' : ''}"><div class="nfh"><label for="n_${k}">${esc(t)}</label><button class="tbtn sm" data-cp="${k}">Copiar</button></div>
       ${ty === 'input' ? `<input id="n_${k}" data-k="${k}" value="${esc(n.f[k] || '')}" placeholder="${esc(ph)}" autocomplete="off">` : `<textarea id="n_${k}" data-k="${k}" rows="${k === 'exig' ? 6 : 3}" placeholder="${esc(ph)}">${esc(n.f[k] || '')}</textarea>`}
-      ${k === 'exig' ? '<button class="tbtn sm" id="nmod" style="margin-top:6px">＋ Inserir do Check-list de exigências</button>' : ''}</div>`).join('')}</div>
+      ${k === 'exig' ? '<button class="tbtn sm" id="nmod" style="margin-top:6px">＋ Inserir do Check-list de exigências</button>' : ''}${k === 'art' || k === 'anexos' ? optsBlock(k) : ''}</div>`).join('')}</div>
     <div class="selbar" style="position:static;margin-top:14px"><span>Nota completa</span><button id="nshare">Compartilhar</button><button class="go" id="ncopy">Copiar tudo</button></div>`);
   const save = () => { const l = notasGet(); const x = l.find(y => y.id === id); if (!x) return; document.querySelectorAll('[data-k]').forEach(e => x.f[e.dataset.k] = e.value); x.atualizado = new Date().toISOString(); notasSet(l); const ht = document.querySelector('#top .htitle'); if (ht) ht.textContent = x.f.protocolo ? 'Protocolo ' + x.f.protocolo : 'Nota de vistoria'; return x; };
   const grow = e => { if (e.tagName === 'TEXTAREA') { e.style.height = 'auto'; e.style.height = Math.max(e.scrollHeight + 2, 70) + 'px'; } };
   let tm; document.querySelectorAll('[data-k]').forEach(e => { grow(e); e.oninput = () => { grow(e); clearTimeout(tm); tm = setTimeout(save, 300); }; e.onblur = save; });
+  wireOpts('art', grow, save); wireOpts('anexos', grow, save);
   document.querySelectorAll('[data-cp]').forEach(b => b.onclick = () => { const v = $('#n_' + b.dataset.cp).value.trim(); v ? copyText(v) : toast('Campo vazio'); });
   $('#ncopy').onclick = () => { const x = save(); const t = notaTexto(x); t ? copyText(t) : toast('Nota vazia'); };
   $('#nshare').onclick = () => { const x = save(); const t = notaTexto(x); if (!t) return toast('Nota vazia'); if (navigator.share) navigator.share({ text: t }).catch(() => {}); else copyText(t); };
