@@ -323,3 +323,4 @@ details.opts .oi small { display: block; font: 600 11px var(--mono); color: var(
 .segm button { border: 1.5px solid var(--line); background: var(--card); border-radius: 999px; padding: 5px 10px; font: 600 13px var(--body); color: var(--ink); }
 .segm button.on { background: var(--red); border-color: var(--red); color: #fff; }
 .espbox .sub select { width: 100%; height: 44px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--card); padding: 0 10px; font: 500 15px var(--body); }
+.nf details.opts .oi, :root[data-theme="dark"] .nf details.opts .oi { color: var(--ink); font: 500 15px/1.3 var(--body); letter-spacing: 0; text-transform: none; }

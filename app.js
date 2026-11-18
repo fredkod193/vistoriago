@@ -194,7 +194,8 @@ function search(q) {
     });
     if (groups.length && !hits) return;
     if (hits < groups.length) score *= 0.25 * hits / groups.length;
-    if (phraseRe && cnt(phraseRe, c.s)) score += 4;
+    const pc = phraseRe ? cnt(phraseRe, c.s) + (phraseRe.lastIndex = 0, cnt(phraseRe, c.st)) * 2 : 0;
+    if (pc) score += 3 + 1.2 * Math.min(pc, 8);
     else if (G.length > 1 && hits === G.length && near(G, c.s)) score = score * 1.5 + 2.5;
     if (itemRe && itemRe.test(c.s)) score += 8;
     if (nts.length) score = ntHit ? score + 3 : score * 0.15;
@@ -398,7 +399,7 @@ function avaliaGLP(c) {
 const ARTMAP = [['Hidrante e mangotinhos', 'a) Hidrantes/mangotinhos'], ['Resfriamento', 'b) Resfriamento de tanques/cilindros'], ['Espuma', 'c) Espuma (tanques e bacias)'], ['Iluminação de emergência', 'e) Iluminação de emergência — só se alimentada por grupo motogerador (+ f) do gerador)', 1], ['Central de gás', 'j) Central de GLP e k) instalações internas de GLP'], ['Chuveiros automáticos', 'l) Chuveiros automáticos'], ['Detecção de incêndio', 'm) Detecção de incêndio'], ['Controle de fumaça', 'n) Controle de fumaça (e g) pressurização de escada, se houver)'], ['Controle de materiais de acabamento', 'o) Materiais de acabamento e revestimento'], ['Segurança estrutural', 'p) Segurança estrutural — Habite-se/aumento de área (q) na renovação, se houver revestimento contra fogo)'], ['Compartimentação', 'r) Compartimentação vertical/horizontal'], ['Alarme de incêndio', 's) Alarme de incêndio'], ['SPDA', 't) SPDA']];
 function docsDe(c, lin) {
   const D = []; const add = (t, ref, st, mot) => D.push({ t, ref, st, mot });
-  const med = k => lin.find(x => x.st !== 'no-tab' && x.m.startsWith(k));
+  const med = k => lin.find(x => x.st !== 'no-tab' && norm(x.m).replace(/^hidrantes /, 'hidrante ').startsWith(norm(k)));
   const div = c.div, area = c.area, lot = c.lot, pav = c.pav;
   // projeto (PSCIP) → Anexo S
   const tr = [];
@@ -457,7 +458,7 @@ function docsDe(c, lin) {
 // Sistemas específicos: fotovoltaico (NT-44/2025) e SAVE – recarga de veículos eletrificados (NT-45/2026)
 function especiais(c, lin) {
   const L = []; const add = (sec, t, ref, st, mot, doc) => L.push({ sec, t, ref, st, mot, doc: !!doc });
-  const brig = lin.find(x => x.st !== 'no-tab' && x.m.startsWith('Brigada'));
+  const brig = lin.find(x => x.st !== 'no-tab' && /^brigada/i.test(x.m));
   const brigOk = brig && brig.st !== 'no';
   const hoje = new Date(), fimTrans = new Date('2026-11-15T00:00:00-03:00');
   if (c.fv) {
@@ -631,12 +632,12 @@ function viewExig() {
     const ctx = { div, a1, area, alt, ter, lot, pav, glp, piro, ...X };
     const lin = meds.map(m => {
       const n = parseCel(m.v[ci]); if (!n) return { m: m.m, st: 'no-tab' };
-      const ev = /^Central de g/.test(m.m) ? avaliaGLP(ctx) : avalia(n, notas, ctx);
+      const ev = /^Central de g/i.test(m.m) ? avaliaGLP(ctx) : avalia(n, notas, ctx);
       return { m: m.m, n, ...ev, v: m.v[ci] };
     });
     if (div === 'A-1') {
       for (const [m, ref] of [['Acesso de viatura (vias do condomínio/loteamento)', 'NT-06'], ['Hidrante urbano', 'NT-34']]) {
-        const x = lin.find(y => y.m.startsWith(m.split(' (')[0]));
+        const x = lin.find(y => norm(y.m).startsWith(norm(m.split(' (')[0])));
         if (x && x.st !== 'no-tab') { x.st = 'ok'; x.n = []; x.motivo = `Nota 1 da Tabela 5: condomínios e loteamentos devem possuir via de acesso para viaturas e hidrante urbano (${ref}).`; }
         else if (x) { Object.assign(x, { n: [], st: 'ok', motivo: `Nota 1 da Tabela 5 – condomínios e loteamentos (${ref}).` }); }
         else if (!x) lin.unshift({ m, n: [], st: 'ok', motivo: `Nota 1 da Tabela 5 – condomínios e loteamentos (${ref}).`, extra: ref });
@@ -652,7 +653,7 @@ function viewExig() {
     const sup = n => n && n.length ? `<sup>${n.join(',')}</sup>` : '';
     const tableHtml = `<div class="ntab-wrap"><table class="ntab"><thead><tr><th>Medidas de segurança</th>${cols.map((c, i) => `<th class="${i === ci ? 'cur' : ''}">${esc(c)}</th>`).join('')}</tr></thead><tbody>${meds.map(m => `<tr><td>${esc(m.m)}</td>${m.v.map((v, i) => { const n = parseCel(v); return `<td class="${i === ci ? 'cur' : ''}">${n ? 'X' + sup(n) : (v ? '–' : '')}</td>`; }).join('')}</tr>`).join('')}</tbody></table></div>`;
     const ord = a => a.slice().sort((x, y) => RANK[y.st] - RANK[x.st]);
-    const item = x => { const nt = ntOf(x); return `<div class="mi ${x.st}"><div class="mtop"><b>${esc(x.m)}${sup(x.n)}</b>${badge(x.st)}</div>${x.motivo ? `<div class="mot">${esc(x.motivo)}</div>` : ''}${x.n && x.n.length && x.st !== 'no' && !/^Central de g/.test(x.m) ? x.n.map(n => `<div class="mot">Nota ${n}: ${esc(notas[n] || '')}</div>`).join('') : ''}${nt && S.docs[nt] ? `<a class="tbtn sm" href="#/doc/${nt}/0">${nt.replace(/-(\d{4}).*$/, '')} ›</a>` : ''}</div>`; };
+    const item = x => { const nt = ntOf(x); return `<div class="mi ${x.st}"><div class="mtop"><b>${esc(x.m)}${sup(x.n)}</b>${badge(x.st)}</div>${x.motivo ? `<div class="mot">${esc(x.motivo)}</div>` : ''}${x.n && x.n.length && x.st !== 'no' && !/^Central de g/i.test(x.m) ? x.n.map(n => `<div class="mot">Nota ${n}: ${esc(notas[n] || '')}</div>`).join('') : ''}${nt && S.docs[nt] ? `<a class="tbtn sm" href="#/doc/${nt}/0">${nt.replace(/-(\d{4}).*$/, '')} ›</a>` : ''}</div>`; };
     const docItem = d => `<div class="mi ${d.st} doc"><div class="mtop"><b>${esc(d.t)}</b>${badge(d.st)}</div><div class="mot">${esc(d.mot)}</div><div class="dref">${esc(d.ref)}</div></div>`;
     const nOk = exig.filter(x => x.st !== 'no').length;
     $('#fres').innerHTML = box(`${esc(tab)} · ${div}`, `

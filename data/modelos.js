@@ -4,7 +4,7 @@ window.MODELOS={
  "modelos": [
   {
    "titulo": "Prazo e Orientações gerais",
-   "texto": "Lei 15.802/06: o PRAZO para cumprimento das exigências que constam neste relatório de inspeção é de até 120 dias.\n\nCOMPETE AO CBMGO, NAS INSPEÇÕES (VISTORIAS) POR MEIO DE SEUS MILITARES, A VERIFICAÇÃO POR AMOSTRAGEM DOS ITENS EXIGIDOS NAS NORMAS TÉCNICAS DO CBMGO, NÃO SE RESPONSABILIZANDO PELO DIMENSIONAMENTO, PELA INSTALAÇÃO, COMISSIONAMENTO, TESTE, MANUTENÇÃO OU UTILIZAÇÃO INDEVIDA. O PRAZO PARA O CUMPRIMENTO DAS EXIGÊNCIAS É DE 30 (TRINTA) DIAS, DE ACORDO COM O ITEM 7.6.4.6.1 DA NORMA TÉCNICA 01/2024\n\nNos retornos das vistorias, considerando o Princípio da Autotutela da Administração Pública, poderão ser apontadas novas exigências, mesmo que não tenham sido observadas tais irregularidades nas vistorias anteriores. Conforme item 7.6.4.6.6 da NT-01.",
+   "texto": "Lei 15.802/06: o PRAZO para cumprimento das exigências que constam neste relatório de inspeção é de até 120 dias.\n\nCOMPETE AO CBMGO, NAS INSPEÇÕES (VISTORIAS) POR MEIO DE SEUS MILITARES, A VERIFICAÇÃO POR AMOSTRAGEM DOS ITENS EXIGIDOS NAS NORMAS TÉCNICAS DO CBMGO, NÃO SE RESPONSABILIZANDO PELO DIMENSIONAMENTO, PELA INSTALAÇÃO, COMISSIONAMENTO, TESTE, MANUTENÇÃO OU UTILIZAÇÃO INDEVIDA. O PRAZO PARA O CUMPRIMENTO DAS EXIGÊNCIAS É DE 30 (TRINTA) DIAS, DE ACORDO COM O ITEM 7.6.4.6.1 DA NORMA TÉCNICA 01/2026\n\nNos retornos das vistorias, considerando o Princípio da Autotutela da Administração Pública, poderão ser apontadas novas exigências, mesmo que não tenham sido observadas tais irregularidades nas vistorias anteriores. Conforme item 7.6.4.4.1 da NT-01/2026.",
    "nts": [
     "01"
    ]
@@ -18,14 +18,14 @@ window.MODELOS={
   },
   {
    "titulo": "7.2 Projeto",
-   "texto": "Apresentar projeto conforme Norma técnica 01 item 6.4.3.3.1:\nNo ato da inspeção, obrigatoriamente deve ser apresentado o último projeto aprovado para a edificação junto ao CBMGO em formato impresso.",
+   "texto": "Apresentar projeto conforme NT-01/2026, item 7.6.2:\nObrigatoriamente deve ser apresentado o Projeto de Segurança Contra Incêndio e Pânico (PSCIP) aprovado, juntamente com o memorial descritivo em formato impresso, que represente a edificação na data da realização da vistoria pelo CBMGO.",
    "nts": [
     "01"
    ]
   },
   {
    "titulo": "Alarme de incêndio (ART)",
-   "texto": "Anexar ART de manutenção do sistema de alarme de incêndio.\n\nInstalar sistema de alarme conforme última atualização da NT-41 (07/09/2024) e nos parâmetros da NT-19.",
+   "texto": "Anexar ART de manutenção do sistema de alarme de incêndio.\n\nInstalar sistema de alarme conforme última atualização da NT-41/2024 e nos parâmetros da NT-19.",
    "nts": [
     "19",
     "41"
@@ -119,7 +119,7 @@ window.MODELOS={
   },
   {
    "titulo": "Porta corta fogo(escada pressurizada)",
-   "texto": "Sinalizar conforme item 5.2 alínea H da norma técnica 13.",
+   "texto": "Sinalizar conforme item 5.2.1, alínea \"i\" da NT-13/2025: deve ser prevista sinalização nas PCF, na face externa à escada, com os dizeres \"ESCADA PRESSURIZADA\", seguindo critérios da NT-20.",
    "nts": [
     "13"
    ]
@@ -187,14 +187,14 @@ window.MODELOS={
   },
   {
    "titulo": "Lixeiras e materiais nos halls",
-   "texto": "NT-11 item 5.5.1.4 Em todas as edificações, independentemente de seu uso ou ocupação, o lixo, materiais descartáveis ou inservíveis, produzidos e/ou decorrentes das atividades afins, somente poderão ser armazenados em compartimentos apropriados e, projetados para este fim, Em hipótese alguma, esses materiais poderão permanecer, mesmo que temporariamente, ao longo dos acessos (corredores e passagens) e, nem no interior de escadas e rampas.",
+   "texto": "NT-11/2025 item 5.5.1.5 Em todas as edificações, independentemente de seu uso ou ocupação, o lixo, materiais descartáveis ou inservíveis, produzidos e/ou decorrentes das atividades afins, somente poderão ser armazenados em compartimentos apropriados e, projetados para este fim, Em hipótese alguma, esses materiais poderão permanecer, mesmo que temporariamente, ao longo dos acessos (corredores e passagens) e, nem no interior de escadas e rampas.",
    "nts": [
     "11"
    ]
   },
   {
    "titulo": "Sinalização de escada pressurizada",
-   "texto": "Norma técnica 13, item 5.2.1, alínea \"g\":\nDeve ser prevista sinalização nas PCF, na face externa à escada, com os seguintes dizeres: “ESCADA PRESSURIZADA”, seguindo critérios da NT 20;",
+   "texto": "NT-13/2025, item 5.2.1, alínea \"i\":\nDeve ser prevista sinalização nas PCF, na face externa à escada, com os seguintes dizeres: “ESCADA PRESSURIZADA”, seguindo critérios da NT 20;",
    "nts": [
     "13",
     "20"
@@ -234,7 +234,7 @@ window.MODELOS={
   },
   {
    "titulo": "Sinalização de PCF quando houver escada pressurizada",
-   "texto": "Sinalizar PCF conforme item 5.2.1, alínea \"g\" da norma técnica 13 ( Deve ser prevista sinalização nas PCF, na face externa à escada, com os seguintes dizeres: “ESCADA PRESSURIZADA”, segui8ndo critérios da NT 20).",
+   "texto": "Sinalizar PCF conforme item 5.2.1, alínea \"i\" da NT-13/2025 ( Deve ser prevista sinalização nas PCF, na face externa à escada, com os seguintes dizeres: “ESCADA PRESSURIZADA”, seguindo critérios da NT 20).",
    "nts": [
     "13",
     "20"
@@ -249,14 +249,14 @@ window.MODELOS={
   },
   {
    "titulo": "Portas automatizadas internas na edificação (portaria remota)",
-   "texto": "Item 5.5.4.10.2 da NT 11: Em edifícios com portaria remota Não são aceitos portas com controle de automação que restrinja o acesso de pessoas das áreas de estacionamento de veículos aos Halls que dão acesso às rotas de fuga da edificação.",
+   "texto": "Item 5.5.4.10.2 da NT-11/2025: Em edifícios com portaria remota Não são aceitos portas com controle de automação que restrinja o acesso de pessoas das áreas de estacionamento de veículos aos Halls que dão acesso às rotas de fuga da edificação.",
    "nts": [
     "11"
    ]
   },
   {
    "titulo": "ANEXO T",
-   "texto": "NT 01/2026 item 6.4.3.18 essa edificação se enquadra na fiscalização intercalada entre inspeções e análise de documentos. O proprietário ou o responsável pelo uso da edificação e/ou área de risco deverá ANEXAR A ESSE PROCESSO O ANEXO T - DECLARAÇÃO DE CONFORMIDADE DA EDIFICAÇÃO DISPONÍVEL NO LINK: https://anexos.bombeiros.go.gov.br/attachmentt. Preenchida e assinada, anexar ao processo cópia do documento de identificação.",
+   "texto": "NT-01/2026, itens 7.10.5 e 7.10.5.1: essa edificação se enquadra na fiscalização intercalada entre inspeções e análise de documentos. O proprietário ou o responsável pelo uso da edificação e/ou área de risco deverá ANEXAR A ESSE PROCESSO O ANEXO T - DECLARAÇÃO DE CONFORMIDADE DA EDIFICAÇÃO DISPONÍVEL NO LINK: https://anexos.bombeiros.go.gov.br/attachmentt. Preenchida e assinada, anexar ao processo cópia do documento de identificação.",
    "nts": [
     "01"
    ]
@@ -280,7 +280,7 @@ window.MODELOS={
   },
   {
    "titulo": "HABITE-SE PARCIAL",
-   "texto": "Conforme NT-01 item 7.3.1.2 Para a solicitação de inspeção de área parcialmente construída, deve ser encaminhada ao Serviço de Segurança Contra Incêndio e Pânico uma solicitação por escrito ou através de Formulário para Atendimento Técnico (Anexo F), especificando a área a ser inspecionada",
+   "texto": "Conforme NT-01/2026 item 7.3.2: Para a solicitação de inspeção de área parcialmente construída, deve ser encaminhada ao Serviço de Segurança Contra Incêndio e Pânico uma solicitação por escrito ou através de Formulário para Atendimento Técnico (Anexo F), especificando a área a ser inspecionada",
    "nts": [
     "01"
    ]
@@ -304,7 +304,7 @@ window.MODELOS={
   },
   {
    "titulo": "SISTEMA FOTOVOLTAICO",
-   "texto": "1⁰ PASSO\nIdentificar o tipo de sistema\n\n-TIPO 1- sistema utiliza inversor centralizado (String)\n-TIPO 2 - sistema por micro-incersores nas próprias placas\n\nEXIGÊNCIAS TIPO 1\n\n• Instalar sistema RSD com o disjuntor de desligamento e sinalizar o dispositivo conforme Item 5.2.2 da NT-44.\n• Na impossibilidade da instalação do RSD, instalar otimizador para o sistema conforme Item 5.2.2.1 da NT-44.\n• Instalar grade de proteção para o inversor central String conforme Item 5.4.1.1 e 5.4.1.1.1 da NT-44.\n• Afastar Inversor Central String do \"material tal\" conforme Item 5.4.1.2 da NT-44.\n• Retirar Inversor Central da rota de fuga conforme Item 5.4.2 da NT-44.\n• Instalar extintor tipo PO 2A20BC a no máximo 5m do Inversor Central conforme Item 5.5.1 da NT-44.\nCobertura de estacionamento - Instalar extintores de PO 2A20BC distribuídos de 25 em 25m conforme Item 5.5.3 da NT-44.\n• Sinalizar Inversor Central com a placa A5 da NT-20 conforme Item 5.6.1 da NT-44.\n• Instalar junto a placa M1, placa de advertência que a edificação possui sistema fotovoltaico conforme Item 5.6.2 da NT-44.\n• Apresentar ART da instalação do sistema fotovoltaico informando qual o tipo instalado e dados técnicos conforme Item 6.4 da NT-44.\n• Apresentar Laudo estrutural e ART atestando que a cobertura possui capacidade para suportar as placas solares conforme Item 6.4.1 da NT-44.",
+   "texto": "1⁰ PASSO\nIdentificar o tipo de sistema\n\n-TIPO 1- sistema utiliza inversor centralizado (String)\n-TIPO 2 - sistema por micro-inversores nas próprias placas ou inversor String conectado a otimizadores (NT-44, item 5.1.1 b)\n\nEXIGÊNCIAS TIPO 1\n\n• Instalar sistema RSD com o disjuntor de desligamento e sinalizar o dispositivo conforme Item 5.2.2 da NT-44.\n• Na impossibilidade da instalação do RSD, instalar otimizador para o sistema conforme Item 5.2.2.1 da NT-44.\n• Instalar grade de proteção para o inversor central String conforme Item 5.4.1.1 e 5.4.1.1.1 da NT-44.\n• Afastar Inversor Central String do \"material tal\" conforme Item 5.4.1.2 da NT-44.\n• Retirar Inversor Central da rota de fuga conforme Item 5.4.2 da NT-44.\n• Instalar extintor tipo PO 2A20BC a no máximo 5m do Inversor Central conforme Item 5.5.1 da NT-44.\nCobertura de estacionamento - Instalar extintores de PO 2A20BC distribuídos de 25 em 25m conforme Item 5.5.3 da NT-44.\n• Sinalizar Inversor Central com a placa A5 e sinalização de solo E17 da NT-20 conforme Item 5.6.1 da NT-44.\n• Instalar junto a placa M1, placa de advertência que a edificação possui sistema fotovoltaico conforme Item 5.6.2 da NT-44.\n• Apresentar ART da instalação do sistema fotovoltaico informando qual o tipo instalado e dados técnicos conforme Item 6.4 da NT-44.\n• Apresentar Laudo estrutural e ART atestando que a cobertura possui capacidade para suportar as placas solares conforme Item 6.4.1 da NT-44.",
    "nts": [
     "20",
     "44"
@@ -380,7 +380,7 @@ window.MODELOS={
   },
   {
    "titulo": "DIGITALIZAÇÃO DE PROJETO",
-   "texto": "Conforme Norma Técnica 01 em seu item 8.5.1.1:  Mesmo não havendo alteração nas características da edificação (área, altura, ocupação etc.), as edificações e áreas de risco que tiverem seus projetos aprovados em formato físico, deverão substituí-los para o formato digital até o dia 01 de janeiro de 2027.",
+   "texto": "Conforme NT-01/2026, item 8.3.1:  Mesmo não havendo alteração nas características da edificação (área, altura, ocupação etc.), as edificações e áreas de risco que tiverem seus projetos aprovados em formato impresso (físico), deverão substituí-los para o formato digital até o dia 01 de janeiro de 2029.",
    "nts": [
     "01"
    ]
